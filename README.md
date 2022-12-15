@@ -1,70 +1,161 @@
-# Getting Started with Create React App
+# React-Redux
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Bu projemde react-redux kullanımı ile ilgili çalışmalara yaptım öncelikle kısaca bahsetmek gerekirse kullandığım kütüphaneler
 
-## Available Scripts
+- redux
+- redux/toolkit
+- redux-persist
 
-In the project directory, you can run:
+# Redux nedir?
 
-### `npm start`
+### Redux özetle state management yani uygulama genelinde olan bitenleri yönetebileceğimiz bir javascript kütüphanesidir. Uygulamamızdaki modalların yönetimden, kullanıcı giriş çıkışına kadar tüm dinamik işlemleri redux ile kontrol edebiliriz. Ayrıca redux çok geniş bir community'e sahip olduğu için sorunlarınızı çözmekte ve uygulamanızın ihtiyacı olan paketleri bulmakta zorlanmayacaksınız.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+# State Nedir?
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Redux kütüphanesini kavrayabilmek için önce state kavramının ne olduğuna yakından bakmamız gerekir. State uygulama için gerekli ve uygulamanın lifecycle'ı içerisinde dinamik olarak değişebilen ve yönetilmesi gereken değişkenlerin bulunduğu bir javascript objesidir.
 
-### `npm test`
+### React.js kullanırken tanımladığımız state ile redux kullanırken tanımladığımız state arasındaki tek fark redux state'inin uygulama genelini kapsaması yani global bir state olmasıdır.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# Neden redux kullanmalıyız?
 
-### `npm run build`
+### Yazılımcılar olarak bazen trendleri fazla önemseyip yaptığımız geliştirmeyi komplex hale getirebiliyoruz. Yani yazılımcı daima basit düşünmelidir ilkesine ters düşebiliyoruz. Bu yüzden önce öğrenmek veya kullanmak istediğimiz aracın ortaya çıkma sebeplerini ve çözdüğü problemleri iyice analiz etmemiz gerekiyor.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Ufak bir tavsiyeden sonra neden redux kullanmalıyız ve react'taki state mekanizmasından farkı ne gibi soruları cevaplamaya çalışalım. Öncelikle react.js'de state'ler her zaman component bazlı oluşturulur ve props yardımı ile diğer component'lara aktarılır.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 💡 State'i props yardımıyla kullanmak isteyen component, state'nin tanımlandığı component'in child component'i olmak zorundadır.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+![img](./readmeimg/react-component-hierarchy.png)
 
-### `npm run eject`
+### Yukarıdaki görseli incelemeye çalışalım. Profile component'inde kullanıcı bilgileri ve giriş yapılma durumu ile ilgili react state'i oluşturulmuş. Bu da demek oluyor ki kullanıcı ile ilgili tüm logic'i Profile component'i barındırıyor. Kullanıcı bilgilerine NewComment component'inde de ihtiyacımız olduğunu varsayalım. Bu durumda aşağıdaki yollardan birini izlememiz gerekecek.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Kullanıcı bilgileri ile ilgili state'i App component'ine taşımak
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Profile component'indeki state ve kontrollerin aynısını NewComment component'ine taşımak
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 🚫 Aşağıda açıklayacağım nedenlerden dolayı bu yolları tercih etmek mantıklı olmayacaktır.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Birinci yolu kullanmamalıyız çünkü ileride ne kadar nested component'a sahip olacağımızı bilemeyiz. 10 seviye alttaki bir component'a kullanıcı bilgilerini props ile taşımak çok doğru olmayacaktır.
 
-## Learn More
+### İkinci yolu da kullanmamalıyız çünkü kullanıcı bilgilerine ihtiyaç duyan component arttıkça code duplicate (kod tekrarı) problemleri ortaya çıkacaktır.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### İşte tam bu noktada redux devreye giriyor. Uygulama genelinde bir state oluşturup dilediğimiz component'in bu state'e kolayca ulaşabilmesi için redux kullanıyoruz 😍.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# Redux temelleri nelerdir?
 
-### Code Splitting
+### Redux aşağıdaki dört temel yapıdan oluşur. Hepsinden teker teker ve detaylı bir şekilde bahsetmeye çalışacağım.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- Actions
+- Dispatch
+- Reducers
+- Store
 
-### Analyzing the Bundle Size
+# Actions
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Redux'ın uygulama genelinde global bir state oluşturduğunu söylemiştik. Actions ise bu global state'e gönderilecek verinin gövdesidir.
 
-### Making a Progressive Web App
+### 💡 Bir action her zaman javascript objesi olmak zorundadır.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Bir action genellikle type ve payload olmak üzere iki adet property'den oluşur. type action'un belirteçi hangi işlemin yapıldığını belirtir. payload ise gönderilecek veriyi içeren property'dir. payload yerine gönderdiğiniz verinin adını da (movie, comment vs.) yazabilirsiniz fakat genel bir kural olarak payload property'sini kullanmaya özen göstermelisiniz.
 
-### Advanced Configuration
+# Dispatch
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Dispatch bir redux method'udur ve redux state'ini güncellemek için kullanılır. Dispatch method'u parametre olarak yukarıda bahsettiğimiz action tipinde bir obje alır.
 
-### Deployment
+# Reducers
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Reducers global state'in güncellendiği, kontrol edildiği ve güncellenmiş state'i return eden klasik bir javascript function'udur. Aşağıda açıklacağım iki parametre alır:
 
-### `npm run build` fails to minify
+- state: uygulamanın geçerli state'i
+- action: global state'i güncellemek için gönderilen action
+- Reducer oluşturmak için aşağıdaki kurallara uymak zorundasınız.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Reducer'ın state parametresini her zaman başlangıç state'ine eşitleyin.
+
+### Oluşturduğunuz reducer her zaman benzersiz bir obje dönmelidir. .push(), .splice() gibi methodlar yerine spread operator, concat() veya Object.assign() gibi yöntemler kullanın.
+
+### Bahsettiğim kurallara uygun reducer örneğimizi yukarıda oluşturmak olduk. Dilerseniz switch/case yerine if/else yapısını da kullanabilirsiniz.
+
+# Store
+
+### Yazının bu kısmına kadar bahsettiğimiz global state'in redux karşılığı store'dur. Tüm reducer'ların birleşimiyle oluşturulur. Redux store oluşturmak için redux içinde bulunan createStore() method'unu kullanırız.
+
+### Redux ile oluşturduğumuz store objesinde aşağıdaki üç adet method bulunur.
+
+- store.getState(): güncel state objesini verir.
+- store.dispatch(): reducer'a state'i güncellemesi için action gönderir.
+- store.subscribe(): store'da oluşan değişiklikleri dinler.
+
+### Redux'ın çalışma prensibi nedir?
+
+### Redux'ın nasıl çalıştığını anlamak için güzel ve sade bir grafik hazırladım. Bu grafik üzerinden sırayla redux'ın nasıl bir çalışma prensibi olduğunu anlatmaya çalışacağım.
+
+![img](./readmeimg/redux-lifecycle.png)
+
+- Kullanıcı view'da herhangi bir action dispatch eder.
+- Action dispatch method'u ile reducer'a iletilir.
+- İletilen action reducer'da işlendikten sonra global store güncellenir.
+- Store'daki güncellemeler view'a yansıtılır.
+
+# Redux nasıl kurulur?
+
+### Şu ana kadar redux hakkında fazlasıyla teorik fakat faydalı bilgiye sahip olduk. Yazının bu kısmından itibaren sadece redux kullanarak ufak bir yorum sistemi yapmaya çalışacağız. Localinizde veya Codesandbox gibi online araçları kullanarak bir proje oluşturabilirsiniz. Projeyi oluşturduğunuzu varsayıp redux kurulumuna geçelim.
+
+### Redux' ister npm veya yarn ile isterseniz de cdn aracılığı ile projenize ekleyebilirsiniz. Gerçek bir proje deneyimi için npm veya yarn'ı seçmek mantıklı olacaktır.
+
+```jsx
+npm install redux
+```
+
+### Redux/toolkit ne işe yarar
+
+```jsx
+npm install @redux/toolkit
+```
+
+### Redux Toolkit paketi, Redux mantığını yazmanın standart yolu olmasını amaçlamıştır. Temel Redux da ki karmaşıklığı ve fazladan kod yazmanın önüne geçilmesi sağlanmıştır. Store yapılandırması daha kolay hale gelmiştir. Paket kurulumları için kolaylıklar getirilmiştir.
+
+# configureStore()
+
+### Reducer ların tanımlanmasını sağlayan yapıdır. Genelde store adında klasör içerisinde index.js veya store.js içerisinde tanımlaması yapılır.
+
+# combineReducer()
+
+### configureStore içerisinde kullanılır, reducer ların combine (birleştirmek) için kullanılır. configureStore içerisinde syntax olarak configureStore tanımlamak biraz okunurluğu azalttığını düşünüyorum.
+
+# createSlice()
+
+### Slice komponent lerin oluşturulmasını sağlar.
+
+### createSlice içerisinde ; name, initialState ve reducers tanımlamalarını yapmamız gerekmektedir.
+
+- name : Reducer adı.
+
+- initialState : başlangıç State i.
+
+- reducers : çalıştırılacak function lar.
+
+# createReducer()
+
+### Export olarak reducer tanımlaması ve dışa aktarımı sağlanıyor.
+
+# CreateAction()
+
+### export olarak dışa aktarılacak actions lar belirleniyor. Burada {} bu şekilde tanımlama yapmadan da kullanımı sağlanıyor, ama ben bu kullanımı daha temiz bulduğum için bu yapıyı kullanıyorum.
+
+# useDispatch()
+
+### createSlice içerisinde tanımlanan actionsların çalıştırılması için kullanılır.
+
+# useSelector(state => state.reducer)
+
+### Reducer içerisinde tanımlanan state bilgisine erişmek ve değişikliklerden haberdar olmak için kullanılır.
+
+- createSlice ile Reducer işlemlerimizi ve action işlemlerimizi yapıyoruz.
+
+- store.js içerisinde recucerları combine liyoruz.
+
+- İndex.js içerisinde en tepede Provider store {} kullanımını sağlıyoruz.
+
+- useDispatch veya useSelector kullanımını komponentler içerisinde sağlıyoruz.
+
+![img](./readmeimg/0fcaa4_c5d98932d1f3459bb9634c21eba4c1b0_mv2.gif)
